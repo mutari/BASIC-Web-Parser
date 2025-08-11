@@ -1,0 +1,23 @@
+{
+  "name": "basic-web-compiler",
+  "version": "1.0.0",
+  "description": "A JavaScript implementation of a BASIC language compiler, rewritten from a Python version to run in web browsers.",
+  "homepage": "https://github.com/mutari/BASIC-Web-Parser#readme",
+  "bugs": {
+    "url": "https://github.com/mutari/BASIC-Web-Parser/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mutari/BASIC-Web-Parser.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "Test.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node Test.js"
+  }
+}
