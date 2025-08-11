@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BASIC Compiler Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .test-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .test-code {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre;
+            margin-bottom: 10px;
+        }
+        .test-output {
+            background-color: #e9f7ef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre;
+        }
+        .test-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+        }
+        .failure {
+            color: red;
+        }
+        .run-all {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .run-all:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>BASIC Compiler Tests</h1>
+    
+    <button id="run-all" class="run-all">Run All Tests</button>
+    
+    <div id="tests-container"></div>
+    
+    <script type="module">
+        import BASICCompiler from './src/main.js';
+        
+        // Test cases
+        const tests = [
+            {
+                name: "Hello World",
+                code: `10 REM Hello World Program
+20 PRINT "Hello, World!"`,
+                expectedOutput: "Hello, World!\n"
+            },
+            {
+                name: "Variable Assignment",
+                code: `10 REM Variable Assignment
+20 LET X = 42
+30 PRINT X`,
+                expectedOutput: "42\n"
+            },
+            {
+                name: "Simple Arithmetic",
+                code: `10 REM Simple Arithmetic
+20 PRINT 2 + 3 * 4`,
+                expectedOutput: "14\n"
+            },
+            {
+                name: "For Loop",
+                code: `10 REM For Loop
+20 FOR I = 1 TO 5
+30 PRINT I
+40 NEXT I`,
+                expectedOutput: "1\n2\n3\n4\n5\n"
+            },
+            {
+                name: "If Statement (True)",
+                code: `10 REM If Statement
+20 LET X = 15
+30 IF X > 10 THEN PRINT "Greater than 10" ELSE PRINT "Less than or equal to 10"`,
+                expectedOutput: "Greater than 10\n"
+            },
+            {
+                name: "If Statement (False)",
+                code: `10 REM If Statement
+20 LET X = 5
+30 IF X > 10 THEN PRINT "Greater than 10" ELSE PRINT "Less than or equal to 10"`,
+                expectedOutput: "Less than or equal to 10\n"
+            },
+            {
+                name: "Array Creation and Access",
+                code: `10 REM Array Test
+20 ARRAY A
+30 A[1] = 42
+40 PRINT A[1]`,
+                expectedOutput: "42\n"
+            },
+            {
+                name: "GOTO Statement",
+                code: `10 REM GOTO Test
+20 PRINT "Before GOTO"
+30 GOTO 50
+40 PRINT "This should not be printed"
+50 PRINT "After GOTO"`,
+                expectedOutput: "Before GOTO\nAfter GOTO\n"
+            }
+        ];
+        
+        // Create test elements
+        const testsContainer = document.getElementById('tests-container');
+        const runAllButton = document.getElementById('run-all');
+        
+        // Create compiler instance
+        const compiler = new BASICCompiler();
+        
+        // Create test elements
+        tests.forEach((test, index) => {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-container';
+            testDiv.innerHTML = `
+                <div class="test-title">Test ${index + 1}: ${test.name}</div>
+                <div class="test-code">${test.code}</div>
+                <div class="test-output" id="output-${index}"></div>
+                <div class="test-status" id="status-${index}"></div>
+                <button class="run-test" data-index="${index}">Run Test</button>
+            `;
+            testsContainer.appendChild(testDiv);
+        });
+        
+        // Add event listeners to run buttons
+        document.querySelectorAll('.run-test').forEach(button => {
+            button.addEventListener('click', () => {
+                const index = parseInt(button.getAttribute('data-index'));
+                runTest(index);
+            });
+        });
+        
+        // Run all tests
+        runAllButton.addEventListener('click', () => {
+            tests.forEach((_, index) => {
+                runTest(index);
+            });
+        });
+        
+        // Run a single test
+        function runTest(index) {
+            const test = tests[index];
+            const outputElement = document.getElementById(`output-${index}`);
+            const statusElement = document.getElementById(`status-${index}`);
+            
+            // Clear output
+            outputElement.textContent = '';
+            
+            // Set output function
+            let output = '';
+            compiler.setOutputFunction(text => {
+                output += text;
+                outputElement.textContent = output;
+            });
+            
+            try {
+                // Run the code
+                compiler.run(test.code, 'main', 'pro', false);
+                
+                // Check if output matches expected
+                if (output === test.expectedOutput) {
+                    statusElement.textContent = 'PASSED';
+                    statusElement.className = 'test-status success';
+                } else {
+                    statusElement.textContent = `FAILED - Expected: "${test.expectedOutput.replace(/\n/g, '\\n')}" but got: "${output.replace(/\n/g, '\\n')}"`;
+                    statusElement.className = 'test-status failure';
+                }
+            } catch (error) {
+                outputElement.textContent = `Error: ${error.message}`;
+                statusElement.textContent = 'FAILED - Error occurred';
+                statusElement.className = 'test-status failure';
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

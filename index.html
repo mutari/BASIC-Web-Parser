@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BASIC Compiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .editor-container, .output-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .editor-header, .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #code-editor, #output {
+            width: 100%;
+            height: 400px;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        #output {
+            background-color: #f5f5f5;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .examples {
+            margin-top: 20px;
+        }
+        .examples select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>BASIC Compiler</h1>
+    
+    <div class="container">
+        <div class="editor-container">
+            <div class="editor-header">
+                <h2>Code Editor</h2>
+                <div class="examples">
+                    <select id="example-select">
+                        <option value="">Select an example</option>
+                        <option value="hello">Hello World</option>
+                        <option value="loop">For Loop</option>
+                        <option value="conditional">Conditional</option>
+                        <option value="game timer">Game timer</option>
+                    </select>
+                </div>
+            </div>
+            <textarea id="code-editor" placeholder="Enter your BASIC code here..."></textarea>
+        </div>
+        
+        <div class="output-container">
+            <div class="output-header">
+                <h2>Output</h2>
+                <button id="run-button">Run</button>
+            </div>
+            <div id="output"></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>JavaScript BASIC Compiler - A rewrite of the Python BASIC Compiler</p>
+    </div>
+
+    <!-- Load the compiler scripts -->
+    <script type="module">
+        import BASICCompiler from './src/main.js';
+        
+        // Get DOM elements
+        const codeEditor = document.getElementById('code-editor');
+        const output = document.getElementById('output');
+        const runButton = document.getElementById('run-button');
+        const exampleSelect = document.getElementById('example-select');
+
+        const worker = new Worker('./Worker.js', { type: 'module' });
+
+        worker.onmessage = (e) => {
+            output.textContent += e.data;
+        };
+
+        runButton.addEventListener('click', () => {
+            output.textContent = '';
+            const code = codeEditor.value;
+            worker.postMessage(code);
+        });
+
+        // Create compiler instance
+        /*const compiler = new BASICCompiler();
+
+        // Set output function
+        compiler.setOutputFunction(text => {
+            output.textContent += text;
+        });
+        
+        // Run button click handler
+        runButton.addEventListener('click', () => {
+            // Clear output
+            output.textContent = '';
+            
+            // Get code from editor
+            const code = codeEditor.value;
+            
+            try {
+                // Run the code
+                compiler.run(code, 'main', 'pro', false);
+            } catch (error) {
+                output.textContent += `\nError: ${error.message}`;
+                console.error(error);
+            }
+        });*/
+        
+        // Example select change handler
+        exampleSelect.addEventListener('change', () => {
+            const example = exampleSelect.value;
+            
+            switch (example) {
+                case 'hello':
+                    codeEditor.value = 
+`10 REM Hello World Program
+20 PRINT "Hello, World!"`;
+                    break;
+                case 'loop':
+                    codeEditor.value = 
+`10 REM For Loop Example
+20 FOR I = 1 TO 5
+30 PRINT "Count: "; I
+40 NEXT I`;
+                    break;
+                case 'conditional':
+                    codeEditor.value = 
+`10 REM Conditional Example
+20 INPUT "Enter a number: "; X
+30 IF X > 10 THEN PRINT "Number is greater than 10" ELSE PRINT "Number is less than or equal to 10"`;
+                    break;
+                case 'game timer':
+                    codeEditor.value =
+`
+100 REM ------- INIT GAME TIME ---------
+101 LOAD SEC
+102 LET LAST_TIME = SEC
+
+110 REM ------- GAME TIME ---------
+111 LOAD SEC
+112 LET DIFF = SEC - LAST_TIME
+113 IF DIFF == 0 THEN GOTO 100190
+114 FOR I = 0 TO DIFF
+115 GOSUB 1020
+116 NEXT I
+119 LAST_TIME = SEC
+120 GOTO 110
+
+1020 REM -------- GAME TICK --------
+1021 PRINT "tick"
+1029 RETURN`
+                    break;
+                default:
+                    codeEditor.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
