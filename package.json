@@ -13,7 +13,7 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "Test.js",
+  "main": "src/main.js",
   "directories": {
     "doc": "docs"
   },
